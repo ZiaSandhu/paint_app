@@ -6,6 +6,12 @@
     background-color: rgb(209, 213, 219);
 }
 
+.canvas_overlay {
+  position: absolute;
+  transform: translateX(-100%);
+  pointer-events: none;
+}
+
 .paint_top {
     display: flex;
     flex: 1 1 0%;

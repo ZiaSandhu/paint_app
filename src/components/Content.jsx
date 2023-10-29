@@ -4,10 +4,9 @@ import Toolbox from "./Toolbox";
 import Actions from "./Actions";
 import ColorBox from "./ColorBox";
 
-import './style.css'
+import "./style.css";
 
 function Content({ width = 400, height = 400 }) {
-
   const pattern = /^[a-zA-Z0-9!@#$%^&*()_+,\-./:;'"<>\[\]{}?|\\ ]$/;
 
   const [history, setHistory] = useState([]);
@@ -19,8 +18,9 @@ function Content({ width = 400, height = 400 }) {
   const [density, setDensity] = useState(20);
   const [brushShape, setBrushShape] = useState("butt");
   const canvasRef = useRef(null);
+  const canvasOverlayRef = useRef(null);
   const ctx = useRef(null);
-
+  const ctxOverlay = useRef(null);
 
   const [isDrawing, setIsDrawing] = useState(false);
   const [offSetX, setOffSetX] = useState(0);
@@ -31,41 +31,36 @@ function Content({ width = 400, height = 400 }) {
 
   const [snapShot, setSnapShot] = useState(null);
 
-  const [curve, setCurve] = useState({
-    isCurve: false,
-    clickCount: 0,
-    start: { x: 0, y: 0 },
-    mid1: { x: 0, y: 0 },
-    mid2: { x: 0, y: 0 },
-    end: { x: 0, y: 0 },
-  });
 
-const [curvePoints, setCurvePoints] = useState([])
-  const [prevCanvas, setPrevCanvas] = useState(null);
+  const [curvePoints, setCurvePoints] = useState([]);
 
   const [text, setText] = useState(false);
   const [textCursor, setTextCursor] = useState(null);
 
   useEffect(() => {
+   if(canvasRef){
     let canvas = canvasRef.current;
     ctx.current = canvas.getContext("2d");
+    let canvasOverlay = canvasOverlayRef.current;
+    ctxOverlay.current = canvasOverlay.getContext("2d");
     const canvasRect = canvas.getBoundingClientRect();
-    // ctx.current.fillStyle = "#fff";
-    // ctx.current.fillRect(
-    //   0,
-    //   0,
-    //   canvasRef.current.width,
-    //   canvasRef.current.height
-    // );
+
     setOffSetX(canvasRect.left);
     setOffSetY(canvasRect.top);
-    // document.addEventListener("keydown", handleKeyPress);
-  }, [canvasRef.current.top,canvasRef.current.left]);
+   }
+  }, [canvasRef.offsetTop,canvasRef.offsetLeft]);
 
-
-
+  useEffect(()=>{
+    ctx.current.drawImage(canvasOverlayRef.current,0,0)
+    ctxOverlay.current.clearRect(
+      0,
+      0,
+      canvasRef.current.width,
+      canvasRef.current.height
+    );
+    setCurvePoints([]);
+  },[activeItem, brushShape, brushWidth])
   function handleMouseDown(e) {
-    
     setIsDrawing(true);
     ctx.current.beginPath();
 
@@ -79,23 +74,31 @@ const [curvePoints, setCurvePoints] = useState([])
     setStartX(e.clientX - offSetX);
     setStartY(e.clientY - offSetY);
 
-    if (activeItem === "Curve" && !curve.isCurve) {
-      setCurvePoints(prev => [...prev,{x:startX,y:startY}])
-      setCurve((prev) => {
-        return {
-          ...prev,
-          isCurve: true,
-          start: { x: e.clientX - offSetX, y: e.clientY - offSetY },
-        };
-      });
-      setPrevCanvas(
-        ctx.current.getImageData(
-          0,
-          0,
-          canvasRef.current.width,
-          canvasRef.current.height
-        )
-      );
+    // if (activeItem === "Curve" && !curve.isCurve) {
+    //   setCurvePoints(prev => [...prev,{x:startX,y:startY}])
+    //   setCurve((prev) => {
+    //     return {
+    //       ...prev,
+    //       isCurve: true,
+    //       start: { x: e.clientX - offSetX, y: e.clientY - offSetY },
+    //     };
+    //   });
+    //   setPrevCanvas(
+    //     ctx.current.getImageData(
+    //       0,
+    //       0,
+    //       canvasRef.current.width,
+    //       canvasRef.current.height
+    //     )
+    //   );
+    // }
+
+    if (activeItem === "Curve") {
+      // jspaint
+      setCurvePoints((prev) => [
+        ...prev,
+        { x: e.clientX - offSetX, y: e.clientY - offSetY },
+      ]);
     }
 
     setSnapShot(
@@ -126,17 +129,8 @@ const [curvePoints, setCurvePoints] = useState([])
       drawLine(e);
     }
 
-    if (activeItem === "Curve") {
-      const [endX, endY] = [e.clientX - offSetX, e.clientY - offSetY];
-      setCurve((prev) => {
-        return {
-          ...prev,
-          mid1: { x: endX, y: endY },
-          mid2: { x: endX, y: endY },
-          end: { x: endX, y: endY },
-        };
-      });
-      drawCurve(startX, startY, endX, endY, endX, endY, endX, endY);
+    if (activeItem === "Curve" && curvePoints.length === 1) {
+      drawCurveOverlay(e);
     }
 
     if (activeItem === "Rectangle") {
@@ -157,8 +151,20 @@ const [curvePoints, setCurvePoints] = useState([])
   function handleMouseUp(e) {
     if (!isDrawing) return;
 
-    if(activeItem === 'Curve'){
-      setCurvePoints(prev => [...prev, {x:e.clientX, y:e.clientY}])
+
+
+    if (activeItem === "Curve") {
+      if(curvePoints.length === 1){
+        setCurvePoints((prev) => [
+          ...prev,
+          { x: e.clientX - offSetX, y: e.clientY - offSetY },
+        ]);
+      }
+      else if (curvePoints.length  > 2) {
+        drawCurveOverlay(e)
+       
+      }
+      
     }
 
     setIsDrawing(false);
@@ -187,78 +193,132 @@ const [curvePoints, setCurvePoints] = useState([])
     setIsDrawing(false);
   }
 
+  function drawCurveOverlay(e) {
+    ctxOverlay.current.clearRect(
+      0,
+      0,
+      canvasRef.current.width,
+      canvasRef.current.height
+    );
+    if (curvePoints.length === 4) {
+      ctxOverlay.current.beginPath();
+    ctxOverlay.current.moveTo(curvePoints[0].x, curvePoints[0].y);
+    ctxOverlay.current.bezierCurveTo(
+      curvePoints[2].x,
+      curvePoints[2].y,
+      curvePoints[3].x,
+      curvePoints[3].y,
+      curvePoints[1].x,
+      curvePoints[1].y
+    );
+    ctxOverlay.current.stroke();
+    ctxOverlay.current.closePath();
+    ctx.current.drawImage(canvasOverlayRef.current,0,0)
+    ctxOverlay.current.clearRect(
+      0,
+      0,
+      canvasRef.current.width,
+      canvasRef.current.height
+    );
+    setCurvePoints([]);
+    } else if (curvePoints.length === 3) {
+      ctxOverlay.current.beginPath();
+    ctxOverlay.current.moveTo(curvePoints[0].x, curvePoints[0].y);
+    ctxOverlay.current.quadraticCurveTo(
+      curvePoints[2].x,
+      curvePoints[2].y,
+      curvePoints[1].x,
+      curvePoints[1].y
+    );
+    ctxOverlay.current.stroke();
+    ctxOverlay.current.closePath();
+    } else if (curvePoints.length === 2) {
+      ctxOverlay.current.beginPath();
+      ctxOverlay.current.moveTo(curvePoints[0].x, curvePoints[0].y);
+      ctxOverlay.current.lineTo(curvePoints[1].x, curvePoints[1].y);
+      ctxOverlay.current.stroke();
+      ctxOverlay.current.closePath();
+    } else {
+      ctxOverlay.current.beginPath();
+      ctxOverlay.current.moveTo(startX, startY);
+      ctxOverlay.current.lineTo(e.clientX-offSetX, e.clientY-offSetY);
+      ctxOverlay.current.stroke();
+      ctxOverlay.current.closePath();
+    }
+  }
+
   function handleClick(e) {
     if (activeItem === "Picker") {
       pickColor(e);
     }
-    if (activeItem === "Curve" && curve.clickCount >= 0) {
-      const [x, y] = [e.clientX - offSetX, e.clientY - offSetY];
-      setCurve((prev) => {
-        return {
-          ...prev,
-          clickCount: 1,
-        };
-      });
-      if (curve.clickCount === 1) {
-        setCurve((prev) => {
-          return {
-            ...prev,
-            mid1: { x, y },
-          };
-        });
+    // if (activeItem === "Curve" && curve.clickCount >= 0) {
+    //   const [x, y] = [e.clientX - offSetX, e.clientY - offSetY];
+    //   setCurve((prev) => {
+    //     return {
+    //       ...prev,
+    //       clickCount: 1,
+    //     };
+    //   });
+    //   if (curve.clickCount === 1) {
+    //     setCurve((prev) => {
+    //       return {
+    //         ...prev,
+    //         mid1: { x, y },
+    //       };
+    //     });
 
-        ctx.current.putImageData(prevCanvas, 0, 0);
+    //     ctx.current.putImageData(prevCanvas, 0, 0);
 
-        drawCurve(
-          curve.start.x,
-          curve.start.y,
-          x,
-          y,
-          curve.mid2.x,
-          curve.mid2.y,
-          curve.end.x,
-          curve.end.y
-        );
-        setCurve((prev) => {
-          return {
-            ...prev,
-            clickCount: 2,
-          };
-        });
-      } else if (curve.clickCount === 2) {
-        setCurve((prev) => {
-          return {
-            ...prev,
-            mid1: { x, y },
-          };
-        });
+    //     drawCurve(
+    //       curve.start.x,
+    //       curve.start.y,
+    //       x,
+    //       y,
+    //       curve.mid2.x,
+    //       curve.mid2.y,
+    //       curve.end.x,
+    //       curve.end.y
+    //     );
+    //     setCurve((prev) => {
+    //       return {
+    //         ...prev,
+    //         clickCount: 2,
+    //       };
+    //     });
+    //   } else if (curve.clickCount === 2) {
+    //     setCurve((prev) => {
+    //       return {
+    //         ...prev,
+    //         mid1: { x, y },
+    //       };
+    //     });
 
-        ctx.current.putImageData(prevCanvas, 0, 0);
+    //     ctx.current.putImageData(prevCanvas, 0, 0);
 
-        drawCurve(
-          curve.start.x,
-          curve.start.y,
-          curve.mid1.x,
-          curve.mid1.y,
-          x,
-          y,
-          curve.end.x,
-          curve.end.y
-        );
-        setCurve((prev) => {
-          return {
-            ...prev,
-            isCurve: false,
-            clickCount: 0,
-            start: { x: 0, y: 0 },
-            mid1: { x: 0, y: 0 },
-            mid2: { x: 0, y: 0 },
-            end: { x: 0, y: 0 },
-          };
-        });
-        setPrevCanvas(null);
-      }
-    }
+    //     drawCurve(
+    //       curve.start.x,
+    //       curve.start.y,
+    //       curve.mid1.x,
+    //       curve.mid1.y,
+    //       x,
+    //       y,
+    //       curve.end.x,
+    //       curve.end.y
+    //     );
+    //     setCurve((prev) => {
+    //       return {
+    //         ...prev,
+    //         isCurve: false,
+    //         clickCount: 0,
+    //         start: { x: 0, y: 0 },
+    //         mid1: { x: 0, y: 0 },
+    //         mid2: { x: 0, y: 0 },
+    //         end: { x: 0, y: 0 },
+    //       };
+    //     });
+    //     setPrevCanvas(null);
+    //   }
+    // }
     if (activeItem === "Fill") {
       console.log("fill bucket");
       let x = startX,
@@ -283,39 +343,30 @@ const [curvePoints, setCurvePoints] = useState([])
   }
 
   function handleKeyDown(e) {
-
-    if ((e.ctrlKey || e.metaKey) && (e.key === 'z' || e.key === 'Z')) {
-      undo()
+    if ((e.ctrlKey || e.metaKey) && (e.key === "z" || e.key === "Z")) {
+      undo();
     }
-    if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || e.key === 'Y')) {
-      redo()
+    if ((e.ctrlKey || e.metaKey) && (e.key === "y" || e.key === "Y")) {
+      redo();
     }
 
-    if(e.key === ' '){
-      e.preventDefault()
+    if (e.key === " ") {
+      e.preventDefault();
     }
 
     if (text && activeItem === "Text") {
       if (e.key === "Enter") {
         setTextCursor(startX);
-        setStartY(prev => prev + 20)
-      } else if(pattern.test(e.key)) {
-        ctx.current.fillStyle = color
+        setStartY((prev) => prev + 20);
+      } else if (pattern.test(e.key)) {
+        ctx.current.fillStyle = color;
         ctx.current.font = "16px Arial";
         ctx.current.fillText(e.key, textCursor, startY);
         setTextCursor((prev) => prev + ctx.current.measureText(e.key).width);
       }
     }
   }
-  function drawCurve(x0, y0, x1, y1, x2, y2, x3, y3) {
-    ctx.current.beginPath();
-    ctx.current.moveTo(x0, y0);
-    // Set both control points to the same position as the end point
-    ctx.current.bezierCurveTo(x1, y1, x2, y2, x3, y3);
-    ctx.current.stroke();
-    // console.log()
-    ctx.current.closePath();
-  }
+
 
   function drawLine(e) {
     ctx.current.beginPath();
@@ -386,10 +437,6 @@ const [curvePoints, setCurvePoints] = useState([])
     const currentY = e.clientY - offSetY;
 
     ctx.current.beginPath();
-    // const radius = Math.sqrt(
-    //   Math.pow( currentX - startX, 2) + Math.pow( currentY - startY, 2)
-    // );
-    // ctx.current.arc(startX, startY, radius, 0, 2 * Math.PI);
 
     const width = currentX - startX;
     const height = currentY - startY;
@@ -536,6 +583,12 @@ const [curvePoints, setCurvePoints] = useState([])
             onMouseUp={handleMouseUp}
             onClick={handleClick}
             onMouseOut={handleMouseOut}
+          />
+          <canvas
+            className="canvas_overlay"
+            width={`${width}px`}
+            height={`${height}px`}
+            ref={canvasOverlayRef}
           />
         </div>
       </div>
