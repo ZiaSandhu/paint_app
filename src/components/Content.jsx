@@ -414,8 +414,6 @@ const [curvePoints, setCurvePoints] = useState([])
       canvasRef.current.width,
       canvasRef.current.height
     );
-    setOffSetX(0);
-    setOffSetY(0);
     setStartX(0);
     setStartY(0);
     setSnapShot(null);
