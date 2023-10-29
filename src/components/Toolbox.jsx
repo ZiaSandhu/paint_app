@@ -45,17 +45,16 @@ const Tools = ({ changeTool, activeItem, setBrushWidth, brushWidth, density, set
   ];
 
   return (
-    <div className=" bg-gray-400 w-28 grid h-fit grid-cols-2 gap-2 py-2 px-2 shadow-lg">
+    <div className="paint_toolbox_main">
       {toolbarItems.map((tool, index) => (
         <div
           key={index}
-          className={`w-8 h-8 col-span-1 border rounded-md border-gray-600 p-1 hover:bg-gray-500 ${
-            activeItem === tool.name && "bg-gray-500"
+          className={`paint_toolbox_tool ${
+            activeItem === tool.name && "paint_toolbox_tool_active"
           }`}
           onClick={() => changeTool(tool.name)}
         >
           <img
-            className="w-6 h-6"
             src={tool.image}
             alt={tool.name}
             title={tool.name}
@@ -64,10 +63,10 @@ const Tools = ({ changeTool, activeItem, setBrushWidth, brushWidth, density, set
       ))}
 
       {drawTools.includes(activeItem) && (
-        <div className="w-full space-y-2 col-span-2 h-auto border-gray-500 border-2 p-2">
+        <div className="paint_toolbox_tool_options">
           <label
             htmlFor="size"
-            className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+            // className=""
           >
             Size
           </label>
@@ -77,19 +76,17 @@ const Tools = ({ changeTool, activeItem, setBrushWidth, brushWidth, density, set
             value={brushWidth}
             min="1"
             max="50"
-            className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
             onChange={(e) => {
               setBrushWidth(e.target.value);
-              console.log(e.target.value);
             }}
           />
 
           {activeItem === "Brush" && (
-            <div className="flex items-center justify-center gap-2">
-              <div className="w-6 h-6 p-1 hover:bg-gray-500 " onClick={()=>setBrushShape('round')}>
+            <div className="paint_toolbox_tool_options_brush">
+              <div onClick={()=>setBrushShape('round')}>
                 <img  src={fillCircle} alt="" />
               </div>
-              <div onClick={()=>setBrushShape('square')} className="w-6 h-6 p-1 hover:bg-gray-500 ">
+              <div onClick={()=>setBrushShape('square')} >
                 <img  src={fillSquare} alt="" />
               </div>
             </div>
@@ -99,7 +96,6 @@ const Tools = ({ changeTool, activeItem, setBrushWidth, brushWidth, density, set
             <>
               <label
                 htmlFor="density"
-                className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
               >
                 Density
               </label>
@@ -109,7 +105,6 @@ const Tools = ({ changeTool, activeItem, setBrushWidth, brushWidth, density, set
                 value={density}
                 min="20"
                 max="100"
-                className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
                 onChange={(e) => {
                   setDensity(e.target.value);
                 }}

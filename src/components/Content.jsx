@@ -4,7 +4,7 @@ import Toolbox from "./Toolbox";
 import Actions from "./Actions";
 import ColorBox from "./ColorBox";
 
-// class drawBazier
+import './style.css'
 
 function Content({ width = 400, height = 400 }) {
 
@@ -503,9 +503,9 @@ const [curvePoints, setCurvePoints] = useState([])
   }
 
   return (
-    <div className="flex flex-col h-screen relative bg-gray-300 pt-1">
-      <div className="flex flex-1 gap-2">
-        <div className="bg-gray-400 h-full w-28 ">
+    <div className="paint_main">
+      <div className="paint_top">
+        <div className="paint_toolbox_container">
           <Toolbox
             brushWidth={brushWidth}
             setBrushWidth={setBrushWidth}
@@ -523,12 +523,12 @@ const [curvePoints, setCurvePoints] = useState([])
           />
         </div>
         <div
-          className="shadow-inset h-full w-full bg-gray-300"
+          className="shadow-inset paint_canvas_container"
           tabIndex={0}
           onKeyDown={handleKeyDown}
         >
           <canvas
-            className="cursor-crosshair bg-white"
+            className="paint_canvas"
             width={`${width}px`}
             height={`${height}px`}
             ref={canvasRef}
@@ -540,7 +540,7 @@ const [curvePoints, setCurvePoints] = useState([])
           />
         </div>
       </div>
-      <div className="flex items-center mt-auto w-full bg-gray-400">
+      <div className="paint_colorbox_container">
         <ColorBox handleChange={changeForegroundColor} color={color} />
       </div>
     </div>

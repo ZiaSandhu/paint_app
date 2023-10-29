@@ -38,15 +38,15 @@ const colors = [
     }
 
     return (
-      <div className=" flex items-center gap-3 w-[420px] h-auto shadow-lg p-5">
-        <div style={selectedColor} className={`w-20 h-10 border-black `}> </div>
-        <div className="flex flex-wrap gap-2">
+      <div className=" paint_colorbox_main">
+        <div style={selectedColor} className={`paint_colorbox_selectedcolor `}> </div>
+        <div className="paint_colorbox">
           {colors.map((colorCode, index) => (
             <div
               key={index}
               style={{ backgroundColor: colorCode}}
               onClick={() => handleChange(colorCode)}
-              className={`w-4 h-4 border-gray-500 border p-0.5 `}
+              className={`paint_colorbox_color`}
             />
           ))}
         </div>

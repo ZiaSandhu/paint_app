@@ -12,11 +12,11 @@ const Actions = ({clearCanvas, handleUndo,handleRedo}) => {
   ];
 
   return (
-    <div className=" bg-gray-400  w-28 flex h-fit flex-wrap gap-5 py-2 px-2 shadow-lg">
+    <div className=" paint_toolbox_action_main">
       {actionsList.map((tool, index) => (
         <div
           key={index}
-          className={`w-8h-8 p-1 border rounded-md border-gray-600 hover:bg-gray-400`}
+          className={`paint_toolbox_action`}
           onClick={tool.onclick}
         >
           <img
@@ -28,11 +28,10 @@ const Actions = ({clearCanvas, handleUndo,handleRedo}) => {
         </div>
       ))}
       <div
-        className={`w-full h-8 p-1 flex items-center justify-center gap-2 bg-red-500 text-gray-900 border  rounded-md border-gray-600 hover:bg-red-500/50`}
+        className={`paint_toolbox_clear`}
         onClick={clearCanvas}
       >
         <img
-          className="w-6 h-6"
           src={clear}
           alt="clear"
           title="Clear Canvas"

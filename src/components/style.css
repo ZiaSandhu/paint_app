@@ -1,0 +1,199 @@
+.paint_main {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    position: relative;
+    background-color: rgb(209, 213, 219);
+    padding-top: 0.25rem;
+}
+
+.paint_top {
+    display: flex;
+    flex: 1 1 0%;
+    gap: 0.5rem;
+}
+
+.paint_toolbox_container {
+    background-color: rgb(156, 163, 175);
+    height: 100%;
+    width: 7rem;
+}
+
+.paint_canvas_container {
+    height: 100%;
+    width: 100%;
+    background-color: rgb(209, 213, 219);
+}
+
+.paint_canvas {
+    background-color: white;
+    cursor: crosshair;
+}
+
+.paint_colorbox_container {
+    display: flex;
+    align-items: center;
+    margin-top: auto;
+    width: 100%;
+    background-color: rgb(156, 163, 175);
+}
+
+.paint_toolbox_main {
+    background-color: rgb(156, 163, 175);
+    width: 100%;
+    display: grid;
+    height: fit-content;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.5rem;
+    padding: 0.5rem
+}
+
+.paint_toolbox_tool {
+    width: 2rem;
+    height: 2rem;
+    grid-column: span 1 / span 1;
+    border: 1px solid rgb(75, 85, 99);
+    border-radius: 0.375rem;
+    padding: 0.25rem;
+}
+
+.paint_toolbox_tool_active,
+.paint_toolbox_tool:hover {
+    background-color: rgb(107, 114, 128);
+}
+
+.paint_toolbox_tool img {
+    width: 1.5rem;
+    height: 1.5rem;
+}
+
+.paint_toolbox_tool_options {
+    width: 100%;
+    margin-bottom: 0.5rem;
+    grid-column: span 2;
+    height: auto;
+    border: 2px solid #6b7280;
+    padding: 0.5rem;
+}
+
+.paint_toolbox_tool_options label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #1a202c;
+}
+
+.paint_toolbox_tool_options input {
+    width: 100%;
+    height: 0.5rem;
+    background-color: #edf2f7;
+    border-radius: 0.375rem;
+    -webkit-appearance: none;
+    appearance: none;
+    cursor: pointer;
+}
+
+.paint_toolbox_tool_options_brush {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.paint_toolbox_tool_options_brush>div {
+    width: 1.5rem;
+    height: 1.5rem;
+    padding: 0.25rem;
+    transition: background-color 0.2s;
+}
+
+.paint_toolbox_tool_options_brush>div:hover {
+    background-color: #6b7280;
+}
+
+.paint_toolbox_action_main {
+    background-color: rgb(156, 163, 175); /* bg-gray-400 */
+    width: 7rem; /* w-28 */
+    display: flex; /* flex */
+    height: fit-content; /* h-fit */
+    flex-wrap: wrap; /* flex-wrap */
+    gap: 1.25rem; /* gap-5 */
+    padding-top: 0.5rem; /* py-2 */
+    padding-bottom: 0.5rem; /* py-2 */
+    padding-left: 0.5rem; /* px-2 */
+    padding-right: 0.5rem; /* px-2 */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* shadow-lg */
+  }
+
+  .paint_toolbox_action {
+    width: 2rem; /* w-8 */
+    height: 2rem; /* h-8 */
+    padding: 0.25rem; /* p-1 */
+    border-width: 1px; /* border */
+    border-style: solid; /* border */
+    border-radius: 0.375rem; /* rounded-md */
+    border-color: rgb(75, 98, 99); 
+  }
+  .paint_toolbox_action img{
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+  .paint_toolbox_action:hover {
+    background-color:rgb(107, 114, 128); /* hover:bg-gray-400 */
+  }
+
+  .paint_toolbox_clear {
+    width: 100%; /* w-full */
+    height: 2rem; /* h-8 */
+    padding: 0.25rem; /* p-1 */
+    display: flex; /* flex */
+    align-items: center; /* items-center */
+    justify-content: center; /* justify-center */
+    gap: 0.5rem; /* gap-2 */
+    background-color: rgb(239, 68, 68); /* bg-red-500 */
+    color: #1a202c; /* text-gray-900 */
+    border-width: 1px; /* border */
+    border-radius: 0.375rem; /* rounded-md */
+    border-color: rgb(75, 98, 99); 
+  }
+  
+  .paint_toolbox_clear img{
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+
+  .paint_toolbox_clear:hover {
+    background-color: rgba(239, 68, 68, 0.5); /* hover:bg-red-500/50 */
+  }
+  
+
+  .paint_colorbox_main {
+    display: flex; /* flex */
+    align-items: center; /* items-center */
+    gap: 0.75rem; /* gap-3 */
+    width: 430px; /* w-[420px] */
+    height: auto; /* h-auto */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* shadow-lg */
+    padding: 1.25rem; /* p-5 */
+  }
+  
+  .paint_colorbox_selectedcolor {
+    width: 5rem; /* w-20 */
+    height: 2.5rem; /* h-10 */
+    border: 1px solid #000; /* border-black */
+  }
+  
+  .paint_colorbox {
+    display: flex; /* flex */
+    flex-wrap: wrap; /* flex-wrap */
+    gap: 0.5rem; /* gap-2 */
+  }
+  
+  .paint_colorbox_color {
+    width: 1rem; /* w-4 */
+    height: 1rem; /* h-4 */
+    border: 1px solid #718096; /* border-gray-500 */
+    padding: 0.125rem; /* p-0.5 */
+  }
+  
