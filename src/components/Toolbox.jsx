@@ -83,10 +83,10 @@ const Tools = ({ changeTool, activeItem, setBrushWidth, brushWidth, density, set
 
           {activeItem === "Brush" && (
             <div className="paint_toolbox_tool_options_brush">
-              <div onClick={()=>setBrushShape('round')}>
+              <div className="paint_toolbox_brush_shapes" onClick={()=>setBrushShape('round')}>
                 <img  src={fillCircle} alt="" />
               </div>
-              <div onClick={()=>setBrushShape('square')} >
+              <div className="paint_toolbox_brush_shapes" onClick={()=>setBrushShape('square')} >
                 <img  src={fillSquare} alt="" />
               </div>
             </div>
