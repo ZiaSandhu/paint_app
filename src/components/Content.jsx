@@ -41,6 +41,7 @@ function Content({ width = 400, height = 400 }) {
     end: { x: 0, y: 0 },
   });
 
+const [curvePoints, setCurvePoints] = useState([])
   const [prevCanvas, setPrevCanvas] = useState(null);
 
   const [text, setText] = useState(false);
@@ -77,6 +78,7 @@ function Content({ width = 400, height = 400 }) {
     setStartY(e.clientY - offSetY);
 
     if (activeItem === "Curve" && !curve.isCurve) {
+      setCurvePoints(prev => [...prev,{x:startX,y:startY}])
       setCurve((prev) => {
         return {
           ...prev,
@@ -151,8 +153,13 @@ function Content({ width = 400, height = 400 }) {
       spray(e);
     }
   }
-  function handleMouseUp() {
+  function handleMouseUp(e) {
     if (!isDrawing) return;
+
+    if(activeItem === 'Curve'){
+      setCurvePoints(prev => [...prev, {x:e.clientX, y:e.clientY}])
+    }
+
     setIsDrawing(false);
     const canvas = ctx.current.getImageData(
       0,
@@ -318,7 +325,7 @@ function Content({ width = 400, height = 400 }) {
   }
 
   function spray(event) {
-    const radius = 20; // Adjust the radius as needed
+    const radius = brushWidth; // Adjust the radius as needed
     // const density = 40; // Adjust the density as needed
 
     for (let i = 0; i < density; i++) {
