@@ -21,7 +21,6 @@ function Content({ width = 400, height = 400 }) {
   const canvasRef = useRef(null);
   const ctx = useRef(null);
 
-  const [mouseMoved, setMouseMoved] = useState(false);
 
   const [isDrawing, setIsDrawing] = useState(false);
   const [offSetX, setOffSetX] = useState(0);
@@ -61,9 +60,12 @@ const [curvePoints, setCurvePoints] = useState([])
     setOffSetX(canvasRect.left);
     setOffSetY(canvasRect.top);
     // document.addEventListener("keydown", handleKeyPress);
-  }, []);
+  }, [canvasRef.current.top,canvasRef.current.left]);
+
+
 
   function handleMouseDown(e) {
+    
     setIsDrawing(true);
     ctx.current.beginPath();
 
@@ -108,7 +110,6 @@ const [curvePoints, setCurvePoints] = useState([])
   function handleMouseMove(e) {
     if (!isDrawing) return;
 
-    setMouseMoved(true);
     if (activeItem !== "Airbrush") ctx.current.putImageData(snapShot, 0, 0);
 
     if (
