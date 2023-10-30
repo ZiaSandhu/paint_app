@@ -11,6 +11,7 @@ function Content({ width = 400, height = 400 }) {
 
   const [history, setHistory] = useState([]);
   const [index, setIndex] = useState(-1);
+  const [curvePoints, setCurvePoints] = useState([]);
 
   const [activeItem, setActiveItem] = useState("Pencil");
   const [color, setColor] = useState("black");
@@ -32,26 +33,26 @@ function Content({ width = 400, height = 400 }) {
   const [snapShot, setSnapShot] = useState(null);
 
 
-  const [curvePoints, setCurvePoints] = useState([]);
-
   const [text, setText] = useState(false);
   const [textCursor, setTextCursor] = useState(null);
 
+  // Setting initil offset of canvas
   useEffect(() => {
-   if(canvasRef){
-    let canvas = canvasRef.current;
-    ctx.current = canvas.getContext("2d");
-    let canvasOverlay = canvasOverlayRef.current;
-    ctxOverlay.current = canvasOverlay.getContext("2d");
-    const canvasRect = canvas.getBoundingClientRect();
+    if (canvasRef) {
+      let canvas = canvasRef.current;
+      ctx.current = canvas.getContext("2d");
+      let canvasOverlay = canvasOverlayRef.current;
+      ctxOverlay.current = canvasOverlay.getContext("2d");
+      const canvasRect = canvas.getBoundingClientRect();
 
-    setOffSetX(canvasRect.left);
-    setOffSetY(canvasRect.top);
-   }
-  }, [canvasRef.offsetTop,canvasRef.offsetLeft]);
+      setOffSetX(canvasRect.left);
+      setOffSetY(canvasRect.top);
+    }
+  }, [canvasRef.offsetTop, canvasRef.offsetLeft]);
 
-  useEffect(()=>{
-    ctx.current.drawImage(canvasOverlayRef.current,0,0)
+  // set image from overview canvas to main canvas if tool changes for curve tool
+  useEffect(() => {
+    ctx.current.drawImage(canvasOverlayRef.current, 0, 0);
     ctxOverlay.current.clearRect(
       0,
       0,
@@ -59,7 +60,9 @@ function Content({ width = 400, height = 400 }) {
       canvasRef.current.height
     );
     setCurvePoints([]);
-  },[activeItem, brushShape, brushWidth])
+  }, [activeItem, brushShape, brushWidth, color]);
+
+  // mouse down event
   function handleMouseDown(e) {
     setIsDrawing(true);
     ctx.current.beginPath();
@@ -73,26 +76,7 @@ function Content({ width = 400, height = 400 }) {
 
     setStartX(e.clientX - offSetX);
     setStartY(e.clientY - offSetY);
-
-    // if (activeItem === "Curve" && !curve.isCurve) {
-    //   setCurvePoints(prev => [...prev,{x:startX,y:startY}])
-    //   setCurve((prev) => {
-    //     return {
-    //       ...prev,
-    //       isCurve: true,
-    //       start: { x: e.clientX - offSetX, y: e.clientY - offSetY },
-    //     };
-    //   });
-    //   setPrevCanvas(
-    //     ctx.current.getImageData(
-    //       0,
-    //       0,
-    //       canvasRef.current.width,
-    //       canvasRef.current.height
-    //     )
-    //   );
-    // }
-
+// Curve Tool Mouse Down event
     if (activeItem === "Curve") {
       // jspaint
       setCurvePoints((prev) => [
@@ -110,12 +94,14 @@ function Content({ width = 400, height = 400 }) {
       )
     );
   }
+// mouse move event
   function handleMouseMove(e) {
     if (!isDrawing) return;
-
-    if (activeItem !== "Airbrush") ctx.current.putImageData(snapShot, 0, 0);
-
-    if (
+    else if (activeItem !== "Airbrush")
+      {
+        ctx.current.putImageData(snapShot, 0, 0);
+      }
+    else if (
       activeItem === "Pencil" ||
       activeItem === "Brush" ||
       activeItem === "Erase"
@@ -123,51 +109,40 @@ function Content({ width = 400, height = 400 }) {
       ctx.current.strokeStyle = activeItem === "Erase" ? "#fff" : color;
       ctx.current.lineTo(e.clientX - offSetX, e.clientY - offSetY);
       ctx.current.stroke();
-    }
-
-    if (activeItem === "Line") {
+    } else if (activeItem === "Line") {
       drawLine(e);
-    }
-
-    if (activeItem === "Curve" && curvePoints.length === 1) {
+    } else if (activeItem === "Curve" && curvePoints.length === 1) {
       drawCurveOverlay(e);
-    }
-
-    if (activeItem === "Rectangle") {
+    } else if (activeItem === "Rectangle") {
       drawRect(e);
-    }
-    if (activeItem === "Round Rectangle") {
+    } else if (activeItem === "Round Rectangle") {
       drawRoundedRect(e);
-    }
-
-    if (activeItem === "Circle") {
+    } else if (activeItem === "Circle") {
       drawCircle(e);
-    }
-
-    if (activeItem === "Airbrush") {
+    } else if (activeItem === "Airbrush") {
       spray(e);
     }
   }
+  // mouse up event
   function handleMouseUp(e) {
     if (!isDrawing) return;
-
-
-
+    setIsDrawing(false);
+// curve tool mouse up option
     if (activeItem === "Curve") {
-      if(curvePoints.length === 1){
+      if (curvePoints.length === 1) {
         setCurvePoints((prev) => [
           ...prev,
           { x: e.clientX - offSetX, y: e.clientY - offSetY },
         ]);
+      } else if (curvePoints.length > 2) {
+        drawCurveOverlay(e);
       }
-      else if (curvePoints.length  > 2) {
-        drawCurveOverlay(e)
-       
-      }
-      
     }
 
-    setIsDrawing(false);
+    savePreviousState();
+  }
+// set canvas previous state to implement undo and redo features
+  function savePreviousState() {
     const canvas = ctx.current.getImageData(
       0,
       0,
@@ -193,59 +168,6 @@ function Content({ width = 400, height = 400 }) {
     setIsDrawing(false);
   }
 
-  function drawCurveOverlay(e) {
-    ctxOverlay.current.clearRect(
-      0,
-      0,
-      canvasRef.current.width,
-      canvasRef.current.height
-    );
-    if (curvePoints.length === 4) {
-      ctxOverlay.current.beginPath();
-    ctxOverlay.current.moveTo(curvePoints[0].x, curvePoints[0].y);
-    ctxOverlay.current.bezierCurveTo(
-      curvePoints[2].x,
-      curvePoints[2].y,
-      curvePoints[3].x,
-      curvePoints[3].y,
-      curvePoints[1].x,
-      curvePoints[1].y
-    );
-    ctxOverlay.current.stroke();
-    ctxOverlay.current.closePath();
-    ctx.current.drawImage(canvasOverlayRef.current,0,0)
-    ctxOverlay.current.clearRect(
-      0,
-      0,
-      canvasRef.current.width,
-      canvasRef.current.height
-    );
-    setCurvePoints([]);
-    } else if (curvePoints.length === 3) {
-      ctxOverlay.current.beginPath();
-    ctxOverlay.current.moveTo(curvePoints[0].x, curvePoints[0].y);
-    ctxOverlay.current.quadraticCurveTo(
-      curvePoints[2].x,
-      curvePoints[2].y,
-      curvePoints[1].x,
-      curvePoints[1].y
-    );
-    ctxOverlay.current.stroke();
-    ctxOverlay.current.closePath();
-    } else if (curvePoints.length === 2) {
-      ctxOverlay.current.beginPath();
-      ctxOverlay.current.moveTo(curvePoints[0].x, curvePoints[0].y);
-      ctxOverlay.current.lineTo(curvePoints[1].x, curvePoints[1].y);
-      ctxOverlay.current.stroke();
-      ctxOverlay.current.closePath();
-    } else {
-      ctxOverlay.current.beginPath();
-      ctxOverlay.current.moveTo(startX, startY);
-      ctxOverlay.current.lineTo(e.clientX-offSetX, e.clientY-offSetY);
-      ctxOverlay.current.stroke();
-      ctxOverlay.current.closePath();
-    }
-  }
 
   function handleClick(e) {
     if (activeItem === "Picker") {
@@ -367,7 +289,62 @@ function Content({ width = 400, height = 400 }) {
     }
   }
 
-
+  // curve tool function
+  function drawCurveOverlay(e) {
+    ctxOverlay.current.clearRect(
+      0,
+      0,
+      canvasRef.current.width,
+      canvasRef.current.height
+    );
+    if (curvePoints.length === 4) {
+      ctxOverlay.current.beginPath();
+      ctxOverlay.current.moveTo(curvePoints[0].x, curvePoints[0].y);
+      ctxOverlay.current.bezierCurveTo(
+        curvePoints[2].x,
+        curvePoints[2].y,
+        curvePoints[3].x,
+        curvePoints[3].y,
+        curvePoints[1].x,
+        curvePoints[1].y
+      );
+      ctxOverlay.current.stroke();
+      ctxOverlay.current.closePath();
+      ctx.current.drawImage(canvasOverlayRef.current, 0, 0);
+      ctxOverlay.current.clearRect(
+        0,
+        0,
+        canvasRef.current.width,
+        canvasRef.current.height
+      );
+      setCurvePoints([]);
+      savePreviousState();
+    } else if (curvePoints.length === 3) {
+      ctxOverlay.current.beginPath();
+      ctxOverlay.current.moveTo(curvePoints[0].x, curvePoints[0].y);
+      ctxOverlay.current.quadraticCurveTo(
+        curvePoints[2].x,
+        curvePoints[2].y,
+        curvePoints[1].x,
+        curvePoints[1].y
+      );
+      ctxOverlay.current.stroke();
+      ctxOverlay.current.closePath();
+    } else if (curvePoints.length === 2) {
+      ctxOverlay.current.beginPath();
+      ctxOverlay.current.moveTo(curvePoints[0].x, curvePoints[0].y);
+      ctxOverlay.current.lineTo(curvePoints[1].x, curvePoints[1].y);
+      ctxOverlay.current.stroke();
+      ctxOverlay.current.closePath();
+    } else {
+      ctxOverlay.current.beginPath();
+      ctxOverlay.current.moveTo(startX, startY);
+      ctxOverlay.current.lineTo(e.clientX - offSetX, e.clientY - offSetY);
+      ctxOverlay.current.stroke();
+      ctxOverlay.current.closePath();
+    }
+  }
+// line tool function
   function drawLine(e) {
     ctx.current.beginPath();
     ctx.current.moveTo(startX, startY);
@@ -375,7 +352,7 @@ function Content({ width = 400, height = 400 }) {
     ctx.current.stroke();
     ctx.current.closePath();
   }
-
+// air brush function
   function spray(event) {
     const radius = brushWidth; // Adjust the radius as needed
     // const density = 40; // Adjust the density as needed
@@ -394,13 +371,16 @@ function Content({ width = 400, height = 400 }) {
       ctx.current.stroke();
     }
   }
-
+// rectangle tool function
   function drawRect(e) {
     const width = e.clientX - offSetX - startX;
     const height = e.clientY - offSetY - startY;
     ctx.current.strokeRect(startX, startY, width, height);
   }
-  function drawRoundedRect(e, radius = 10) {
+  // rounded rectangle tool function
+  function drawRoundedRect(e, radius = 10) 
+  // radius of rounded corner of rectangle
+  {
     const width = e.clientX - offSetX - startX;
     const height = e.clientY - offSetY - startY;
     ctx.current.beginPath();
@@ -431,7 +411,7 @@ function Content({ width = 400, height = 400 }) {
     ctx.current.closePath();
     ctx.current.stroke();
   }
-
+// circle tool function
   function drawCircle(e) {
     const currentX = e.clientX - offSetX;
     const currentY = e.clientY - offSetY;
@@ -454,7 +434,7 @@ function Content({ width = 400, height = 400 }) {
     ctx.current.closePath();
     ctx.current.stroke();
   }
-
+// clear canvas function
   function clearCanvas() {
     ctx.current.clearRect(
       0,
@@ -540,10 +520,6 @@ function Content({ width = 400, height = 400 }) {
     setActiveItem(tool);
   }
 
-  function handleSizeChange(size) {
-    setBrushWidth(size);
-  }
-
   function changeForegroundColor(color) {
     setColor(color);
   }
@@ -600,7 +576,7 @@ function Content({ width = 400, height = 400 }) {
 }
 
 export default Content;
-
+// fill bucket function
 function draw_fill_without_pattern_support(
   canvas,
   ctx,
