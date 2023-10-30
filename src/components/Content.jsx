@@ -76,9 +76,11 @@ function Content({ width = 400, height = 400 }) {
 
     setStartX(e.clientX - offSetX);
     setStartY(e.clientY - offSetY);
+
 // Curve Tool Mouse Down event
     if (activeItem === "Curve") {
-      // jspaint
+      ctxOverlay.current.strokeStyle = color;
+      ctxOverlay.current.lineWidth = brushWidth;
       setCurvePoints((prev) => [
         ...prev,
         { x: e.clientX - offSetX, y: e.clientY - offSetY },
@@ -97,31 +99,31 @@ function Content({ width = 400, height = 400 }) {
 // mouse move event
   function handleMouseMove(e) {
     if (!isDrawing) return;
-    else if (activeItem !== "Airbrush")
+     if (activeItem !== "Airbrush")
       {
         ctx.current.putImageData(snapShot, 0, 0);
       }
-    else if (
-      activeItem === "Pencil" ||
-      activeItem === "Brush" ||
-      activeItem === "Erase"
-    ) {
-      ctx.current.strokeStyle = activeItem === "Erase" ? "#fff" : color;
-      ctx.current.lineTo(e.clientX - offSetX, e.clientY - offSetY);
-      ctx.current.stroke();
-    } else if (activeItem === "Line") {
-      drawLine(e);
-    } else if (activeItem === "Curve" && curvePoints.length === 1) {
-      drawCurveOverlay(e);
-    } else if (activeItem === "Rectangle") {
-      drawRect(e);
-    } else if (activeItem === "Round Rectangle") {
-      drawRoundedRect(e);
-    } else if (activeItem === "Circle") {
-      drawCircle(e);
-    } else if (activeItem === "Airbrush") {
-      spray(e);
-    }
+     if (
+       activeItem === "Pencil" ||
+       activeItem === "Brush" ||
+       activeItem === "Erase"
+     ) {
+       ctx.current.strokeStyle = activeItem === "Erase" ? "#fff" : color;
+       ctx.current.lineTo(e.clientX - offSetX, e.clientY - offSetY);
+       ctx.current.stroke();
+     } else if (activeItem === "Line") {
+       drawLine(e);
+     } else if (activeItem === "Curve" && curvePoints.length === 1) {
+       drawCurveOverlay(e);
+     } else if (activeItem === "Rectangle") {
+       drawRect(e);
+     } else if (activeItem === "Round Rectangle") {
+       drawRoundedRect(e);
+     } else if (activeItem === "Circle") {
+       drawCircle(e);
+     } else if (activeItem === "Airbrush") {
+       spray(e);
+     }
   }
   // mouse up event
   function handleMouseUp(e) {
@@ -173,74 +175,6 @@ function Content({ width = 400, height = 400 }) {
     if (activeItem === "Picker") {
       pickColor(e);
     }
-    // if (activeItem === "Curve" && curve.clickCount >= 0) {
-    //   const [x, y] = [e.clientX - offSetX, e.clientY - offSetY];
-    //   setCurve((prev) => {
-    //     return {
-    //       ...prev,
-    //       clickCount: 1,
-    //     };
-    //   });
-    //   if (curve.clickCount === 1) {
-    //     setCurve((prev) => {
-    //       return {
-    //         ...prev,
-    //         mid1: { x, y },
-    //       };
-    //     });
-
-    //     ctx.current.putImageData(prevCanvas, 0, 0);
-
-    //     drawCurve(
-    //       curve.start.x,
-    //       curve.start.y,
-    //       x,
-    //       y,
-    //       curve.mid2.x,
-    //       curve.mid2.y,
-    //       curve.end.x,
-    //       curve.end.y
-    //     );
-    //     setCurve((prev) => {
-    //       return {
-    //         ...prev,
-    //         clickCount: 2,
-    //       };
-    //     });
-    //   } else if (curve.clickCount === 2) {
-    //     setCurve((prev) => {
-    //       return {
-    //         ...prev,
-    //         mid1: { x, y },
-    //       };
-    //     });
-
-    //     ctx.current.putImageData(prevCanvas, 0, 0);
-
-    //     drawCurve(
-    //       curve.start.x,
-    //       curve.start.y,
-    //       curve.mid1.x,
-    //       curve.mid1.y,
-    //       x,
-    //       y,
-    //       curve.end.x,
-    //       curve.end.y
-    //     );
-    //     setCurve((prev) => {
-    //       return {
-    //         ...prev,
-    //         isCurve: false,
-    //         clickCount: 0,
-    //         start: { x: 0, y: 0 },
-    //         mid1: { x: 0, y: 0 },
-    //         mid2: { x: 0, y: 0 },
-    //         end: { x: 0, y: 0 },
-    //       };
-    //     });
-    //     setPrevCanvas(null);
-    //   }
-    // }
     if (activeItem === "Fill") {
       console.log("fill bucket");
       let x = startX,
