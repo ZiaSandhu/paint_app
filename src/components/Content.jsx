@@ -36,7 +36,7 @@ function Content({ width = 400, height = 400 }) {
   const [text, setText] = useState(false);
   const [textCursor, setTextCursor] = useState(null);
 
-  // Setting initil offset of canvas
+  // Setting initil offset of canvas position
   useEffect(() => {
     if (canvasRef) {
       let canvas = canvasRef.current;
@@ -48,7 +48,7 @@ function Content({ width = 400, height = 400 }) {
       setOffSetX(canvasRect.left);
       setOffSetY(canvasRect.top);
     }
-  }, [canvasRef.offsetTop, canvasRef.offsetLeft]);
+  }, [canvasRef.offsetTop, canvasRef.offsetLeft]); // need to change here
 
   // set image from overview canvas to main canvas if tool changes for curve tool
   useEffect(() => {
