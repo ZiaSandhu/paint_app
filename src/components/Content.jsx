@@ -458,6 +458,28 @@ function Content({ width = 400, height = 400 }) {
     setColor(color);
   }
 
+  function saveFile(){
+    const canvas = canvasRef.current;
+
+    // Check if the canvas reference is available
+    if (canvas) {
+      // Convert canvas content to a data URL
+      const dataUrl = canvas.toDataURL('image/png');
+
+      // Create an anchor element and set its attributes
+      const a = document.createElement('a');
+      a.href = dataUrl;
+      a.download = 'canvas_image.png';
+
+      // Append the anchor element to the document and simulate a click
+      document.body.appendChild(a);
+      a.click();
+
+      // Remove the anchor element from the document
+      document.body.removeChild(a);
+    }
+  }
+
   return (
     <div className="paint_main">
       <div className="paint_top">
@@ -477,6 +499,11 @@ function Content({ width = 400, height = 400 }) {
             handleRedo={redo}
             handleUndo={undo}
           />
+         <div className="save-button">
+         <button onClick={saveFile} >
+            Save
+          </button>
+          </div> 
         </div>
         <div
           className="shadow-inset paint_canvas_container"

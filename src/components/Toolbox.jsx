@@ -113,6 +113,7 @@ const Tools = ({ changeTool, activeItem, setBrushWidth, brushWidth, density, set
           )}
         </div>
       )}
+
     </div>
   );
 };
